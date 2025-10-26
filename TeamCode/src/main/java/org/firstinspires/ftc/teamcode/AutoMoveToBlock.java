@@ -31,6 +31,20 @@ public class AutoMoveToBlock extends BlocksOpModeCompanion {
     }
 
     @ExportToBlocks(
+            heading = "設定PID的數值",
+            parameterLabels = {"位置P","位置I","位置D","角度P","角度I","角度D"},
+            parameterDefaultValues = {"0.03","0","0","0.015","0","0"}
+    )
+    public static void pidetting(double p_pos,double i_pos,double d_pos,double p_head,double i_head,double d_head){
+        kP_pos = p_pos;
+        kI_pos = i_pos;
+        kD_pos = d_pos;
+
+        kP_head = p_head;
+        kI_head = i_head;
+        kD_head = d_head;
+    }
+    @ExportToBlocks(
             heading = "移動(公分)",
             parameterLabels = {"前後","左右","旋轉","移動允許誤差","轉動允許誤差"},
             parameterDefaultValues ={"0.0","0.0","0.0","1.0","0.1"}
