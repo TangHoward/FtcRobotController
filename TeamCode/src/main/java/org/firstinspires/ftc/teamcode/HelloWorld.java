@@ -3,21 +3,18 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-//用@Disable 可以讓她不要顯示在Driver Hub上面
-@TeleOp
-public class HelloWorld extends OpMode {
+import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion;
+import org.firstinspires.ftc.robotcore.external.ExportToBlocks;
 
-    @Override
-    public void init() {
-        telemetry.addData("Hello","World");
+
+public class HelloWorld extends BlocksOpModeCompanion {
+    @ExportToBlocks(
+            parameterLabels = {"要顯示的字串"},
+            parameterDefaultValues = {"Helloworld"}
+    )
+    public void Helloworld(String word){
+        telemetry.addData("顯示的字",word);
+        telemetry.update();
     }
 
-    @Override
-    public void loop() {
-
-    }
-    //
-    /*
-    當我打完/* 之後按Enter可以生出* /
-     */
 }

@@ -4,6 +4,7 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -63,6 +64,7 @@ public class AutoMoveToBlock extends BlocksOpModeCompanion {
         kI_head = i_head;
         kD_head = d_head;
     }
+
     @ExportToBlocks(
             heading = "移動(公分)",
             parameterLabels = {"前後Y","左右X","旋轉(逆時針)","移動允許誤差","轉動允許誤差"},
@@ -103,6 +105,11 @@ public class AutoMoveToBlock extends BlocksOpModeCompanion {
         mRL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         mRR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        mFL.setDirection(DcMotorSimple.Direction.REVERSE);
+        mFR.setDirection(DcMotorSimple.Direction.FORWARD);
+        mRL.setDirection(DcMotorSimple.Direction.REVERSE);
+        mRR.setDirection(DcMotorSimple.Direction.FORWARD);
+
         while (linearOpMode.opModeIsActive()) {
             pinPoint.update();
 
@@ -118,10 +125,10 @@ public class AutoMoveToBlock extends BlocksOpModeCompanion {
 
 
             if (CheckCollision() && needcareforce) {
-                telemetry.addData("!!! 碰撞偵測 !!!", "偵測到撞擊");
+                telemetry.addData("撞到了!!", "撞到了");
                 telemetry.update();
                 StopMotors();
-                return false;// 偵測到碰撞，立即退出移動迴圈
+                return false;//有碰撞就出去迴圈
             }
             if (lastAceel != null && needcareforce) { // 只需要檢查 lastAceel
                 Acceleration currentAccelDebug = imu.getOverallAcceleration();
@@ -143,7 +150,7 @@ public class AutoMoveToBlock extends BlocksOpModeCompanion {
                 return true;
             }
 
-            // PID 積分與微分計算
+            //PID的計算
             integralX += errorX;
             integralY += errorY;
             integralHeading += errorHeading;
@@ -166,12 +173,10 @@ public class AutoMoveToBlock extends BlocksOpModeCompanion {
             double targetOmega = kP_head * errorHeading + kI_head * integralHeading + kD_head * derivativeHeading;
 
 
-            // 全局速度轉換成本體座標速度
+            // 全局速度改成機器速度
             double headingRad = Math.toRadians(heading);
             double robotVx = targetVxGlobal * Math.cos(headingRad) - targetVyGlobal * Math.sin(headingRad);
             double robotVy = targetVxGlobal * Math.sin(headingRad) + targetVyGlobal * Math.cos(headingRad);
-
-            // 計算四輪馬達功率
 
             double powerFL = robotVy + robotVx + targetOmega;
             double powerFR = robotVy - robotVx - targetOmega;
@@ -198,7 +203,7 @@ public class AutoMoveToBlock extends BlocksOpModeCompanion {
         mRR.setPower(0);
     }
 
-    // 解決里程計的角度問題
+    // 解決里程計的角度問題 把任何角度變成 -180 ~ 180
     private static double AngleWrap(double angle) {
         while (angle > 180) angle -= 360;
         while (angle < -180) angle += 360;
